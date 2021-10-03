@@ -27,7 +27,7 @@
                     "id": "8e1fea52-b77d-441e-9a01-a46347b65dab",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Tap(duration=0.1)"
+                    "interactions": ""
                 },
                 {
                     "name": "HighJump",

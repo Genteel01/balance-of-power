@@ -35,13 +35,13 @@ public class PlayerMovement : MonoBehaviour
 
     void OnJump()
     {
-        ProcessJump(0.75f);
-    }
-
-    void OnHighJump()
-    {
         ProcessJump(1f);
     }
+
+    //void OnHighJump()
+    //{
+    //    ProcessJump(1f);
+    //}
 
     void ProcessJump(float jumpHeightModifier)
     {
