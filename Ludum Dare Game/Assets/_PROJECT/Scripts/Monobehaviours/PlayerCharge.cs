@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class PlayerCharge : BaseChargeLevel
@@ -9,24 +10,32 @@ public class PlayerCharge : BaseChargeLevel
 
     public GameObject zapLocationObject;
 
-    public Transform zapStartLocation;
+    public GameObject zapStartLocation;
 
     public float zapRange = 5;
 
-    public GameObject playerModel;
+    //Had to move this here and use Update instead of OnZap to make keyboard controls work
+    public Vector3 aimValue = new Vector3();
+
+    public UnityEvent loseEvent;
 
     private void Start()
     {
         base.Start();
         zapLocationObject.SetActive(false);
+        zapStartLocation.SetActive(false);
     }
     public override void HandleMinCharge()
     {
+        base.HandleMinCharge();
+        loseEvent.Invoke();
         Debug.Log("You died from low charge");
     }
 
     public override void HandleMaxCharge()
     {
+        base.HandleMaxCharge();
+        loseEvent.Invoke();
         Debug.Log("You died from overloading");
     }
 
@@ -38,35 +47,47 @@ public class PlayerCharge : BaseChargeLevel
     void OnSuckPower()
     {
         suckPower = true;
-        playerModel.transform.rotation = Quaternion.Euler(0, 0, 180);
     }
 
     void OnSendPower()
     {
         suckPower = false;
-        playerModel.transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
     void OnZap(InputValue value)
     {
-        Vector3 aimVal = value.Get<Vector2>();
-        if(aimVal.magnitude < 0.15)
+        aimValue = value.Get<Vector2>();
+        aimValue *= zapRange;
+    }
+
+    private void Update()
+    {
+        if (aimValue.magnitude < 0.2)
         {
             zapLocationObject.SetActive(false);
+            zapStartLocation.SetActive(false);
         }
         else
         {
-            zapLocationObject.SetActive(true);
-            aimVal *= zapRange;
+            if (suckPower)
+            {
+                zapLocationObject.SetActive(true);
+                zapStartLocation.SetActive(false);
+            }
+            else
+            {
+                zapStartLocation.SetActive(true);
+                zapLocationObject.SetActive(false);
+            }
             RaycastHit lineCastInfo;
-            if (Physics.Linecast(zapStartLocation.position, zapStartLocation.position + aimVal, out lineCastInfo))
+            if (Physics.Linecast(zapStartLocation.transform.position, zapStartLocation.transform.position + aimValue, out lineCastInfo))
             {
                 zapLocationObject.transform.position = lineCastInfo.point;
                 ChargedObject otherObject = lineCastInfo.collider.GetComponentInParent<ChargedObject>();
                 if (otherObject)
                 {
-                    float change = otherObject.transferSpeed * transferSpeed * 0.06f;
-                    if(suckPower)
+                    float change = otherObject.transferSpeed * transferSpeed * Time.deltaTime;
+                    if (suckPower)
                     {
                         change = Mathf.Min(change, Mathf.Abs(otherObject.chargeLevel));
                         UpdateCharge(change);
@@ -83,7 +104,7 @@ public class PlayerCharge : BaseChargeLevel
             }
             else
             {
-                zapLocationObject.transform.position = zapStartLocation.position + aimVal;
+                zapLocationObject.transform.position = zapStartLocation.transform.position + aimValue;
             }
         }
     }

@@ -27,8 +27,10 @@ public class PlayerMovement : MonoBehaviour
     int layerMask;
     void OnMove(InputValue value)
     {
-        Vector3 moveVal = value.Get<Vector2>();
-        movement = new Vector3(moveVal.x * moveSpeed, 0, 0);
+        //Vector3 moveVal = value.Get<Vector2>();
+        //movement = new Vector3(moveVal.x * moveSpeed, 0, 0);
+        float moveVal = value.Get<float>();
+        movement = new Vector3(moveVal * moveSpeed, 0, 0);
     }
 
     void OnJump()

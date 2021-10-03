@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 
 public abstract class BaseChargeLevel : MonoBehaviour
@@ -17,6 +18,9 @@ public abstract class BaseChargeLevel : MonoBehaviour
     List<Vector3> startingIndicatorSize = new List<Vector3>();
 
     public float transferSpeed;
+
+    public UnityEvent lowChargeEvent;
+    public UnityEvent highChargeEvent;
     protected void Start()
     {
         for (int i = 0; i < chargeIndicator.Length; i++)
@@ -44,7 +48,13 @@ public abstract class BaseChargeLevel : MonoBehaviour
         }
     }
 
-    public abstract void HandleMaxCharge();
+    public virtual void HandleMaxCharge()
+    {
+        highChargeEvent.Invoke();
+    }
 
-    public abstract void HandleMinCharge();
+    public virtual void HandleMinCharge()
+    {
+        lowChargeEvent.Invoke();
+    }
 }
